@@ -1,27 +1,32 @@
-import { Home, Library, Shuffle } from "lucide-react";
-import { useState } from "react";
+import { Link, useRouterState } from "@tanstack/react-router";
+import { Compass, Home, Library, User } from "lucide-react";
 import type { ComponentType, SVGProps } from "react";
 
 import { cn } from "@/lib/utils";
 
-type NavItemId = "random" | "home" | "library";
-
 type NavItem = {
-  id: NavItemId;
+  to: string;
   label: string;
   Icon: ComponentType<SVGProps<SVGSVGElement>>;
+  matchPrefix?: string;
 };
 
 const navItems: NavItem[] = [
-  { id: "random", label: "Random", Icon: Shuffle },
-  { id: "home", label: "Home", Icon: Home },
-  { id: "library", label: "Library", Icon: Library },
+  { to: "/", label: "Home", Icon: Home },
+  { to: "/library", label: "Library", Icon: Library, matchPrefix: "/library" },
+  { to: "/explore", label: "Explore", Icon: Compass },
+  { to: "/profile", label: "Profile", Icon: User },
 ];
 
-const Footer_main = () => {
-  const [activeItem, setActiveItem] = useState<NavItemId>("home");
+const isActivePath = (pathname: string, item: NavItem): boolean => {
+  if (item.matchPrefix) return pathname.startsWith(item.matchPrefix);
+  return pathname === item.to;
+};
 
-  const handleSelect = (id: NavItemId) => setActiveItem(id);
+const BottomNav = () => {
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  });
 
   return (
     <footer className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
@@ -29,15 +34,15 @@ const Footer_main = () => {
         aria-label="Primary"
         className="mx-auto flex h-16 w-full max-w-md items-stretch"
       >
-        {navItems.map(({ id, label, Icon }) => {
-          const isActive = activeItem === id;
+        {navItems.map((item) => {
+          const isActive = isActivePath(pathname, item);
+          const { Icon, label, to } = item;
           return (
-            <button
-              key={id}
-              type="button"
+            <Link
+              key={to}
+              to={to}
               aria-label={label}
               aria-current={isActive ? "page" : undefined}
-              onClick={() => handleSelect(id)}
               className={cn(
                 "flex flex-1 flex-col items-center justify-center gap-1 text-xs font-medium transition-colors",
                 isActive
@@ -50,7 +55,7 @@ const Footer_main = () => {
                 aria-hidden="true"
               />
               <span className="uppercase tracking-wide">{label}</span>
-            </button>
+            </Link>
           );
         })}
       </nav>
@@ -58,4 +63,4 @@ const Footer_main = () => {
   );
 };
 
-export default Footer_main;
+export default BottomNav;
