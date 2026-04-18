@@ -1,13 +1,48 @@
 import { Link } from "@tanstack/react-router"
+import { Plus } from "lucide-react"
+import { useState } from "react"
 
 import BookCover from "@/components/book/BookCover"
 import StarRating from "@/components/book/StarRating"
 import BottomNav from "@/components/layout/BottomNav"
+import AddBookDialog, {
+  type NewBookInput,
+} from "@/components/library/AddBookDialog"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
-import { books, getProgressPercent } from "@/data/books"
+import { books as initialBooks, getProgressPercent, type Book } from "@/data/books"
+
+const slugify = (value: string): string =>
+  value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "") || "book"
+
+const createBook = ({ name, author, totalPages }: NewBookInput): Book => ({
+  id: `${slugify(name)}-${Date.now()}`,
+  name,
+  author,
+  year: new Date().getFullYear(),
+  genres: [],
+  rating: 0,
+  totalPages,
+  currentPage: 0,
+  status: "planned",
+  sessions: [],
+})
 
 const LibraryPage = () => {
+  const [books, setBooks] = useState<Book[]>(initialBooks)
+  const [isAddOpen, setIsAddOpen] = useState(false)
+
+  const handleOpen = () => setIsAddOpen(true)
+  const handleClose = () => setIsAddOpen(false)
+  const handleAddBook = (input: NewBookInput) => {
+    setBooks((previous) => [createBook(input), ...previous])
+  }
+
   return (
     <div className="mx-auto flex h-full w-full max-w-md flex-col pb-24">
       <main className="flex-1 overflow-y-auto px-4 pt-4">
@@ -57,6 +92,26 @@ const LibraryPage = () => {
           })}
         </ul>
       </main>
+
+      <div className="pointer-events-none fixed inset-x-0 bottom-20 z-20">
+        <div className="mx-auto flex w-full max-w-md justify-end px-4">
+          <Button
+            type="button"
+            size="icon"
+            aria-label="Add new book"
+            onClick={handleOpen}
+            className="pointer-events-auto size-11 rounded-xl border border-white/10 bg-card/80 text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_8px_24px_rgba(0,0,0,0.45)] backdrop-blur-md hover:bg-card hover:border-white/20 [&_svg:not([class*='size-'])]:size-5"
+          >
+            <Plus aria-hidden="true" />
+          </Button>
+        </div>
+      </div>
+
+      <AddBookDialog
+        open={isAddOpen}
+        onClose={handleClose}
+        onSubmit={handleAddBook}
+      />
 
       <BottomNav />
     </div>
