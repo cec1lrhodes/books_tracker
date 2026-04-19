@@ -1,27 +1,27 @@
-export type BookStatus = "reading" | "finished" | "planned"
+export type BookStatus = "reading" | "finished" | "planned";
 
 export type ReadingSession = {
-  id: string
-  label: string
-  fromPage: number
-  toPage: number
-  minutes: number
-}
+  id: string;
+  label: string;
+  fromPage: number;
+  toPage: number;
+  minutes: number;
+};
 
 export type Book = {
-  id: string
-  name: string
-  author: string
-  year: number
-  genres: string[]
-  rating: number
-  totalPages: number
-  currentPage: number
-  status: BookStatus
-  startedAt?: string
-  finishedAgo?: string
-  sessions: ReadingSession[]
-}
+  id: string;
+  name: string;
+  author: string;
+  year: number;
+  genres: string[];
+  rating: number;
+  totalPages: number;
+  currentPage: number;
+  status: BookStatus;
+  startedAt?: string;
+  finishedAgo?: string;
+  sessions: ReadingSession[];
+};
 
 export const books: Book[] = [
   {
@@ -113,10 +113,7 @@ export const books: Book[] = [
     finishedAgo: "last month",
     sessions: [],
   },
-]
-
-export const getBookById = (id: string): Book | undefined =>
-  books.find((book) => book.id === id)
+];
 
 export const getProgressPercent = (current: number, total: number): number =>
-  Math.min(100, Math.round((current / total) * 100))
+  Math.min(100, Math.round((current / total) * 100));

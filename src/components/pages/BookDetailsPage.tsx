@@ -4,16 +4,28 @@ import { ChevronLeft } from "lucide-react"
 import BookCover from "@/components/book/BookCover"
 import StarRating from "@/components/book/StarRating"
 import BottomNav from "@/components/layout/BottomNav"
+import PlaceholderPage from "@/components/pages/PlaceholderPage"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import type { Book } from "@/data/books"
 import { getProgressPercent } from "@/data/books"
+import { useBookById } from "@/store/useLibrary"
 
 type BookDetailsPageProps = {
-  book: Book
+  bookId: string
 }
 
-const BookDetailsPage = ({ book }: BookDetailsPageProps) => {
+const BookDetailsPage = ({ bookId }: BookDetailsPageProps) => {
+  const book = useBookById(bookId)
+
+  if (!book) {
+    return (
+      <PlaceholderPage
+        title="Book not found"
+        description="We couldn't find this book in your library."
+      />
+    )
+  }
+
   const percent = getProgressPercent(book.currentPage, book.totalPages)
 
   return (

@@ -5,43 +5,19 @@ import { useState } from "react"
 import BookCover from "@/components/book/BookCover"
 import StarRating from "@/components/book/StarRating"
 import BottomNav from "@/components/layout/BottomNav"
-import AddBookDialog, {
-  type NewBookInput,
-} from "@/components/library/AddBookDialog"
+import AddBookDialog from "@/components/library/AddBookDialog"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
-import { books as initialBooks, getProgressPercent, type Book } from "@/data/books"
-
-const slugify = (value: string): string =>
-  value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "") || "book"
-
-const createBook = ({ name, author, totalPages }: NewBookInput): Book => ({
-  id: `${slugify(name)}-${Date.now()}`,
-  name,
-  author,
-  year: new Date().getFullYear(),
-  genres: [],
-  rating: 0,
-  totalPages,
-  currentPage: 0,
-  status: "planned",
-  sessions: [],
-})
+import { getProgressPercent } from "@/data/books"
+import { useBooks } from "@/store/useLibrary"
 
 const LibraryPage = () => {
-  const [books, setBooks] = useState<Book[]>(initialBooks)
+  const books = useBooks()
   const [isAddOpen, setIsAddOpen] = useState(false)
 
   const handleOpen = () => setIsAddOpen(true)
   const handleClose = () => setIsAddOpen(false)
-  const handleAddBook = (input: NewBookInput) => {
-    setBooks((previous) => [createBook(input), ...previous])
-  }
 
   return (
     <div className="mx-auto flex h-full w-full max-w-md flex-col pb-24">
@@ -107,11 +83,7 @@ const LibraryPage = () => {
         </div>
       </div>
 
-      <AddBookDialog
-        open={isAddOpen}
-        onClose={handleClose}
-        onSubmit={handleAddBook}
-      />
+      <AddBookDialog open={isAddOpen} onClose={handleClose} />
 
       <BottomNav />
     </div>

@@ -6,7 +6,8 @@ import BottomNav from "@/components/layout/BottomNav"
 import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { books, getProgressPercent } from "@/data/books"
+import { getProgressPercent } from "@/data/books"
+import { useBooks } from "@/store/useLibrary"
 
 const filterTabs = [
   { value: "all", label: "All" },
@@ -16,6 +17,7 @@ const filterTabs = [
 ] as const
 
 const MainPage = () => {
+  const books = useBooks()
   const currentlyReading = books.filter((book) => book.status === "reading")
   const recentlyFinished = books.filter((book) => book.status === "finished")
 

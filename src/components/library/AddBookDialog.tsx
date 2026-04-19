@@ -5,20 +5,15 @@ import { createPortal } from "react-dom"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-
-export type NewBookInput = {
-  name: string
-  author: string
-  totalPages: number
-}
+import { useAddBook } from "@/store/useLibrary"
 
 type AddBookDialogProps = {
   open: boolean
   onClose: () => void
-  onSubmit: (book: NewBookInput) => void
 }
 
-const AddBookDialog = ({ open, onClose, onSubmit }: AddBookDialogProps) => {
+const AddBookDialog = ({ open, onClose }: AddBookDialogProps) => {
+  const addBook = useAddBook()
   const [name, setName] = useState("")
   const [author, setAuthor] = useState("")
   const [pages, setPages] = useState("")
@@ -55,7 +50,7 @@ const AddBookDialog = ({ open, onClose, onSubmit }: AddBookDialogProps) => {
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!isValid) return
-    onSubmit({
+    addBook({
       name: name.trim(),
       author: author.trim(),
       totalPages,
