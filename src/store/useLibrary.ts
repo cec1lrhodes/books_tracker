@@ -1,26 +1,31 @@
-import { create } from "zustand"
-import { createJSONStorage, persist } from "zustand/middleware"
+import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 
-import { books as initialBooks, type Book } from "@/data/books"
+import {
+  books as initialBooks,
+  type Book,
+  type ReadingSession,
+} from "@/data/books";
 
 export type NewBookInput = {
-  name: string
-  author: string
-  totalPages: number
-}
+  name: string;
+  author: string;
+  totalPages: number;
+};
 
 type LibraryState = {
-  books: Book[]
-  addBook: (input: NewBookInput) => void
-  getBookById: (id: string) => Book | undefined
-}
+  books: Book[];
+  addBook: (input: NewBookInput) => void;
+  addReadingSession: (bookId: string, pagesRead: number) => void;
+  getBookById: (id: string) => Book | undefined;
+};
 
 const slugify = (value: string): string =>
   value
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "") || "book"
+    .replace(/^-|-$/g, "") || "book";
 
 const createBook = ({ name, author, totalPages }: NewBookInput): Book => ({
   id: `${slugify(name)}-${Date.now()}`,
@@ -33,7 +38,17 @@ const createBook = ({ name, author, totalPages }: NewBookInput): Book => ({
   currentPage: 0,
   status: "planned",
   sessions: [],
-})
+});
+
+const formatSessionLabel = (date: Date): string =>
+  date.toLocaleDateString("en-US", { month: "short", day: "2-digit" });
+
+const createSession = (fromPage: number, toPage: number): ReadingSession => ({
+  id: `s-${Date.now()}`,
+  label: formatSessionLabel(new Date()),
+  fromPage,
+  toPage,
+});
 
 export const useLibraryStore = create<LibraryState>()(
   persist(
@@ -41,6 +56,22 @@ export const useLibraryStore = create<LibraryState>()(
       books: initialBooks,
       addBook: (input) =>
         set((state) => ({ books: [createBook(input), ...state.books] })),
+      addReadingSession: (bookId, pagesRead) =>
+        set((state) => ({
+          books: state.books.map((book) => {
+            if (book.id !== bookId) return book;
+            if (!Number.isFinite(pagesRead) || pagesRead <= 0) return book;
+            const fromPage = book.currentPage;
+            const toPage = Math.min(book.totalPages, fromPage + pagesRead);
+            if (toPage <= fromPage) return book;
+            return {
+              ...book,
+              currentPage: toPage,
+              status: toPage >= book.totalPages ? "finished" : "reading",
+              sessions: [createSession(fromPage, toPage), ...book.sessions],
+            };
+          }),
+        })),
       getBookById: (id) => get().books.find((book) => book.id === id),
     }),
     {
@@ -50,13 +81,15 @@ export const useLibraryStore = create<LibraryState>()(
       version: 1,
     },
   ),
-)
+);
 
-export const useBooks = (): Book[] =>
-  useLibraryStore((state) => state.books)
+export const useBooks = (): Book[] => useLibraryStore((state) => state.books);
 
 export const useBookById = (id: string): Book | undefined =>
-  useLibraryStore((state) => state.books.find((book) => book.id === id))
+  useLibraryStore((state) => state.books.find((book) => book.id === id));
 
 export const useAddBook = (): LibraryState["addBook"] =>
-  useLibraryStore((state) => state.addBook)
+  useLibraryStore((state) => state.addBook);
+
+export const useAddReadingSession = (): LibraryState["addReadingSession"] =>
+  useLibraryStore((state) => state.addReadingSession);

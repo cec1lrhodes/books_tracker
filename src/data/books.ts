@@ -5,7 +5,7 @@ export type ReadingSession = {
   label: string;
   fromPage: number;
   toPage: number;
-  minutes: number;
+  minutes?: number;
 };
 
 export type Book = {

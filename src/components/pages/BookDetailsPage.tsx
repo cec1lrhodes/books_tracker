@@ -1,21 +1,27 @@
-import { Link } from "@tanstack/react-router"
-import { ChevronLeft } from "lucide-react"
+import { Link } from "@tanstack/react-router";
+import { ChevronLeft } from "lucide-react";
+import { useState } from "react";
 
-import BookCover from "@/components/book/BookCover"
-import StarRating from "@/components/book/StarRating"
-import BottomNav from "@/components/layout/BottomNav"
-import PlaceholderPage from "@/components/pages/PlaceholderPage"
-import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
-import { getProgressPercent } from "@/data/books"
-import { useBookById } from "@/store/useLibrary"
+import BookCover from "@/components/book/BookCover";
+import StarRating from "@/components/book/StarRating";
+import UpdateProgressDialog from "@/components/book/UpdateProgressDialog";
+import BottomNav from "@/components/layout/BottomNav";
+import PlaceholderPage from "@/components/pages/PlaceholderPage";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { getProgressPercent } from "@/data/books";
+import { useBookById } from "@/store/useLibrary";
 
 type BookDetailsPageProps = {
-  bookId: string
-}
+  bookId: string;
+};
 
 const BookDetailsPage = ({ bookId }: BookDetailsPageProps) => {
-  const book = useBookById(bookId)
+  const book = useBookById(bookId);
+  const [isUpdateOpen, setIsUpdateOpen] = useState(false);
+
+  const handleOpenUpdate = () => setIsUpdateOpen(true);
+  const handleCloseUpdate = () => setIsUpdateOpen(false);
 
   if (!book) {
     return (
@@ -23,10 +29,10 @@ const BookDetailsPage = ({ bookId }: BookDetailsPageProps) => {
         title="Book not found"
         description="We couldn't find this book in your library."
       />
-    )
+    );
   }
 
-  const percent = getProgressPercent(book.currentPage, book.totalPages)
+  const percent = getProgressPercent(book.currentPage, book.totalPages);
 
   return (
     <div className="mx-auto flex h-full w-full max-w-md flex-col pb-24">
@@ -94,6 +100,8 @@ const BookDetailsPage = ({ bookId }: BookDetailsPageProps) => {
 
         <Button
           type="button"
+          onClick={handleOpenUpdate}
+          disabled={book.currentPage >= book.totalPages}
           className="mt-6 h-12 w-full rounded-xl bg-foreground text-background hover:bg-foreground/90"
         >
           Update progress
@@ -123,9 +131,15 @@ const BookDetailsPage = ({ bookId }: BookDetailsPageProps) => {
                       pp. {session.fromPage} – {session.toPage}
                     </span>
                   </div>
-                  <span className="text-sm text-muted-foreground">
-                    {session.minutes} min
-                  </span>
+                  {session.minutes ? (
+                    <span className="text-sm text-muted-foreground">
+                      {session.minutes} min
+                    </span>
+                  ) : (
+                    <span className="text-sm font-medium text-foreground">
+                      +{session.toPage - session.fromPage} pp
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>
@@ -133,9 +147,17 @@ const BookDetailsPage = ({ bookId }: BookDetailsPageProps) => {
         </section>
       </main>
 
+      <UpdateProgressDialog
+        open={isUpdateOpen}
+        onClose={handleCloseUpdate}
+        bookId={book.id}
+        currentPage={book.currentPage}
+        totalPages={book.totalPages}
+      />
+
       <BottomNav />
     </div>
-  )
-}
+  );
+};
 
-export default BookDetailsPage
+export default BookDetailsPage;
