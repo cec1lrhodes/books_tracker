@@ -8,6 +8,12 @@ export type ReadingSession = {
   minutes?: number;
 };
 
+export type Thought = {
+  id: string;
+  label: string;
+  text: string;
+};
+
 export type Book = {
   id: string;
   name: string;
@@ -21,6 +27,7 @@ export type Book = {
   startedAt?: string;
   finishedAgo?: string;
   sessions: ReadingSession[];
+  thoughts: Thought[];
 };
 
 export const books: Book[] = [
@@ -40,6 +47,18 @@ export const books: Book[] = [
       { id: "s2", label: "Apr 15", fromPage: 110, toPage: 140, minutes: 48 },
       { id: "s3", label: "Apr 12", fromPage: 80, toPage: 110, minutes: 52 },
     ],
+    thoughts: [
+      {
+        id: "t1",
+        label: "Apr 15",
+        text: "Gatsby's obsession with the past feels so tragic and timeless at the same time.",
+      },
+      {
+        id: "t2",
+        label: "Apr 12",
+        text: "The green light on the dock is such a perfect symbol of unreachable dreams.",
+      },
+    ],
   },
   {
     id: "1984",
@@ -56,6 +75,7 @@ export const books: Book[] = [
       { id: "s1", label: "Apr 14", fromPage: 50, toPage: 68, minutes: 28 },
       { id: "s2", label: "Apr 10", fromPage: 20, toPage: 50, minutes: 42 },
     ],
+    thoughts: [],
   },
   {
     id: "the-hobbit",
@@ -71,6 +91,7 @@ export const books: Book[] = [
     sessions: [
       { id: "s1", label: "Apr 13", fromPage: 10, toPage: 32, minutes: 30 },
     ],
+    thoughts: [],
   },
   {
     id: "the-lord-of-the-rings",
@@ -86,6 +107,7 @@ export const books: Book[] = [
     sessions: [
       { id: "s1", label: "Apr 16", fromPage: 70, toPage: 100, minutes: 55 },
     ],
+    thoughts: [],
   },
   {
     id: "to-kill-a-mockingbird",
@@ -99,6 +121,7 @@ export const books: Book[] = [
     status: "finished",
     finishedAgo: "2 weeks ago",
     sessions: [],
+    thoughts: [],
   },
   {
     id: "the-catcher-in-the-rye",
@@ -112,6 +135,7 @@ export const books: Book[] = [
     status: "finished",
     finishedAgo: "last month",
     sessions: [],
+    thoughts: [],
   },
 ];
 

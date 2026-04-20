@@ -5,6 +5,7 @@ import {
   books as initialBooks,
   type Book,
   type ReadingSession,
+  type Thought,
 } from "@/data/books";
 
 export type NewBookInput = {
@@ -17,6 +18,7 @@ type LibraryState = {
   books: Book[];
   addBook: (input: NewBookInput) => void;
   addReadingSession: (bookId: string, pagesRead: number) => void;
+  addThought: (bookId: string, text: string) => void;
   getBookById: (id: string) => Book | undefined;
 };
 
@@ -38,16 +40,23 @@ const createBook = ({ name, author, totalPages }: NewBookInput): Book => ({
   currentPage: 0,
   status: "planned",
   sessions: [],
+  thoughts: [],
 });
 
-const formatSessionLabel = (date: Date): string =>
+const formatDayLabel = (date: Date): string =>
   date.toLocaleDateString("en-US", { month: "short", day: "2-digit" });
 
 const createSession = (fromPage: number, toPage: number): ReadingSession => ({
   id: `s-${Date.now()}`,
-  label: formatSessionLabel(new Date()),
+  label: formatDayLabel(new Date()),
   fromPage,
   toPage,
+});
+
+const createThought = (text: string): Thought => ({
+  id: `t-${Date.now()}`,
+  label: formatDayLabel(new Date()),
+  text,
 });
 
 export const useLibraryStore = create<LibraryState>()(
@@ -72,13 +81,37 @@ export const useLibraryStore = create<LibraryState>()(
             };
           }),
         })),
+      addThought: (bookId, text) =>
+        set((state) => {
+          const trimmed = text.trim();
+          if (trimmed.length === 0) return state;
+          return {
+            books: state.books.map((book) =>
+              book.id === bookId
+                ? { ...book, thoughts: [createThought(trimmed), ...book.thoughts] }
+                : book,
+            ),
+          };
+        }),
       getBookById: (id) => get().books.find((book) => book.id === id),
     }),
     {
       name: "books-tracker:library",
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ books: state.books }),
-      version: 1,
+      version: 2,
+      migrate: (persistedState, version) => {
+        if (version < 2) {
+          const legacy = persistedState as { books?: Array<Book & { thoughts?: Thought[] }> };
+          return {
+            books: (legacy.books ?? []).map((book) => ({
+              ...book,
+              thoughts: book.thoughts ?? [],
+            })),
+          };
+        }
+        return persistedState as { books: Book[] };
+      },
     },
   ),
 );
@@ -93,3 +126,6 @@ export const useAddBook = (): LibraryState["addBook"] =>
 
 export const useAddReadingSession = (): LibraryState["addReadingSession"] =>
   useLibraryStore((state) => state.addReadingSession);
+
+export const useAddThought = (): LibraryState["addThought"] =>
+  useLibraryStore((state) => state.addThought);

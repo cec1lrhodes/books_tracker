@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ChevronLeft } from "lucide-react";
 import { useState } from "react";
 
+import AddThoughtDialog from "@/components/book/AddThoughtDialog";
 import BookCover from "@/components/book/BookCover";
 import StarRating from "@/components/book/StarRating";
 import UpdateProgressDialog from "@/components/book/UpdateProgressDialog";
@@ -19,9 +20,12 @@ type BookDetailsPageProps = {
 const BookDetailsPage = ({ bookId }: BookDetailsPageProps) => {
   const book = useBookById(bookId);
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
+  const [isThoughtOpen, setIsThoughtOpen] = useState(false);
 
   const handleOpenUpdate = () => setIsUpdateOpen(true);
   const handleCloseUpdate = () => setIsUpdateOpen(false);
+  const handleOpenThought = () => setIsThoughtOpen(true);
+  const handleCloseThought = () => setIsThoughtOpen(false);
 
   if (!book) {
     return (
@@ -107,6 +111,14 @@ const BookDetailsPage = ({ bookId }: BookDetailsPageProps) => {
           Update progress
         </Button>
 
+        <Button
+          type="button"
+          onClick={handleOpenThought}
+          className="mt-3 h-12 w-full rounded-xl border border-border bg-card text-foreground hover:bg-accent"
+        >
+          Add thought
+        </Button>
+
         <section aria-labelledby="sessions-heading" className="mt-8">
           <h2
             id="sessions-heading"
@@ -145,6 +157,34 @@ const BookDetailsPage = ({ bookId }: BookDetailsPageProps) => {
             </ul>
           )}
         </section>
+
+        <section aria-labelledby="thoughts-heading" className="mt-8">
+          <h2
+            id="thoughts-heading"
+            className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+          >
+            Thoughts
+          </h2>
+          {book.thoughts.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No thoughts yet.</p>
+          ) : (
+            <ul className="flex flex-col gap-3">
+              {book.thoughts.map((thought) => (
+                <li
+                  key={thought.id}
+                  className="flex items-center gap-3 rounded-xl bg-card px-4 py-3"
+                >
+                  <span className="shrink-0 text-sm font-medium text-foreground">
+                    {thought.label}
+                  </span>
+                  <span className="min-w-0 flex-1 truncate text-right text-sm text-muted-foreground">
+                    {thought.text}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
       </main>
 
       {isUpdateOpen && (
@@ -154,6 +194,10 @@ const BookDetailsPage = ({ bookId }: BookDetailsPageProps) => {
           currentPage={book.currentPage}
           totalPages={book.totalPages}
         />
+      )}
+
+      {isThoughtOpen && (
+        <AddThoughtDialog onClose={handleCloseThought} bookId={book.id} />
       )}
 
       <BottomNav />
