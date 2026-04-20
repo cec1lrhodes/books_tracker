@@ -1,69 +1,58 @@
-import { X } from "lucide-react"
-import { useEffect, useState, type FormEvent, type KeyboardEvent } from "react"
-import { createPortal } from "react-dom"
+import { X } from "lucide-react";
+import { useEffect, useState, type FormEvent, type KeyboardEvent } from "react";
+import { createPortal } from "react-dom";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { useAddBook } from "@/store/useLibrary"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { useAddBook } from "@/store/useLibrary";
 
 type AddBookDialogProps = {
-  open: boolean
-  onClose: () => void
-}
+  onClose: () => void;
+};
 
-const AddBookDialog = ({ open, onClose }: AddBookDialogProps) => {
-  const addBook = useAddBook()
-  const [name, setName] = useState("")
-  const [author, setAuthor] = useState("")
-  const [pages, setPages] = useState("")
+const AddBookDialog = ({ onClose }: AddBookDialogProps) => {
+  const addBook = useAddBook();
+  const [name, setName] = useState("");
+  const [author, setAuthor] = useState("");
+  const [pages, setPages] = useState("");
 
   useEffect(() => {
-    if (!open) return
     const handleEscape = (event: globalThis.KeyboardEvent) => {
-      if (event.key === "Escape") onClose()
-    }
-    document.addEventListener("keydown", handleEscape)
-    document.body.style.overflow = "hidden"
+      if (event.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handleEscape);
+    document.body.style.overflow = "hidden";
     return () => {
-      document.removeEventListener("keydown", handleEscape)
-      document.body.style.overflow = ""
-    }
-  }, [open, onClose])
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "";
+    };
+  }, [onClose]);
 
-  useEffect(() => {
-    if (open) return
-    setName("")
-    setAuthor("")
-    setPages("")
-  }, [open])
-
-  if (!open) return null
-
-  const totalPages = Number.parseInt(pages, 10)
+  const totalPages = Number.parseInt(pages, 10);
   const isValid =
     name.trim().length > 0 &&
     author.trim().length > 0 &&
     Number.isFinite(totalPages) &&
-    totalPages > 0
+    totalPages > 0;
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    if (!isValid) return
+    event.preventDefault();
+    if (!isValid) return;
     addBook({
       name: name.trim(),
       author: author.trim(),
       totalPages,
-    })
-    onClose()
-  }
+    });
+    onClose();
+  };
 
   const handleBackdropKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault()
-      onClose()
+      event.preventDefault();
+      onClose();
     }
-  }
+  };
 
   return createPortal(
     <div
@@ -156,7 +145,7 @@ const AddBookDialog = ({ open, onClose }: AddBookDialogProps) => {
       </Card>
     </div>,
     document.body,
-  )
-}
+  );
+};
 
-export default AddBookDialog
+export default AddBookDialog;

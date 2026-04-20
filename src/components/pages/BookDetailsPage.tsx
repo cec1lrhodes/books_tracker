@@ -147,13 +147,14 @@ const BookDetailsPage = ({ bookId }: BookDetailsPageProps) => {
         </section>
       </main>
 
-      <UpdateProgressDialog
-        open={isUpdateOpen}
-        onClose={handleCloseUpdate}
-        bookId={book.id}
-        currentPage={book.currentPage}
-        totalPages={book.totalPages}
-      />
+      {isUpdateOpen && (
+        <UpdateProgressDialog
+          onClose={handleCloseUpdate}
+          bookId={book.id}
+          currentPage={book.currentPage}
+          totalPages={book.totalPages}
+        />
+      )}
 
       <BottomNav />
     </div>

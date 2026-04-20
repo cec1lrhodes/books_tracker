@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { useAddReadingSession } from "@/store/useLibrary";
 
 type UpdateProgressDialogProps = {
-  open: boolean;
   onClose: () => void;
   bookId: string;
   currentPage: number;
@@ -16,7 +15,6 @@ type UpdateProgressDialogProps = {
 };
 
 const UpdateProgressDialog = ({
-  open,
   onClose,
   bookId,
   currentPage,
@@ -28,7 +26,6 @@ const UpdateProgressDialog = ({
   const remaining = Math.max(0, totalPages - currentPage);
 
   useEffect(() => {
-    if (!open) return;
     const handleEscape = (event: globalThis.KeyboardEvent) => {
       if (event.key === "Escape") onClose();
     };
@@ -38,14 +35,7 @@ const UpdateProgressDialog = ({
       document.removeEventListener("keydown", handleEscape);
       document.body.style.overflow = "";
     };
-  }, [open, onClose]);
-
-  useEffect(() => {
-    if (open) return;
-    setPages("");
-  }, [open]);
-
-  if (!open) return null;
+  }, [onClose]);
 
   const pagesRead = Number.parseInt(pages, 10);
   const isValid =

@@ -1,23 +1,23 @@
-import { Link } from "@tanstack/react-router"
-import { Plus } from "lucide-react"
-import { useState } from "react"
+import { Link } from "@tanstack/react-router";
+import { Plus } from "lucide-react";
+import { useState } from "react";
 
-import BookCover from "@/components/book/BookCover"
-import StarRating from "@/components/book/StarRating"
-import BottomNav from "@/components/layout/BottomNav"
-import AddBookDialog from "@/components/library/AddBookDialog"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-import { getProgressPercent } from "@/data/books"
-import { useBooks } from "@/store/useLibrary"
+import BookCover from "@/components/book/BookCover";
+import StarRating from "@/components/book/StarRating";
+import BottomNav from "@/components/layout/BottomNav";
+import AddBookDialog from "@/components/library/AddBookDialog";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { getProgressPercent } from "@/data/books";
+import { useBooks } from "@/store/useLibrary";
 
 const LibraryPage = () => {
-  const books = useBooks()
-  const [isAddOpen, setIsAddOpen] = useState(false)
+  const books = useBooks();
+  const [isAddOpen, setIsAddOpen] = useState(false);
 
-  const handleOpen = () => setIsAddOpen(true)
-  const handleClose = () => setIsAddOpen(false)
+  const handleOpen = () => setIsAddOpen(true);
+  const handleClose = () => setIsAddOpen(false);
 
   return (
     <div className="mx-auto flex h-full w-full max-w-md flex-col pb-24">
@@ -30,7 +30,7 @@ const LibraryPage = () => {
             const percent = getProgressPercent(
               book.currentPage,
               book.totalPages,
-            )
+            );
             return (
               <li key={book.id}>
                 <Link
@@ -64,7 +64,7 @@ const LibraryPage = () => {
                   </Card>
                 </Link>
               </li>
-            )
+            );
           })}
         </ul>
       </main>
@@ -83,11 +83,11 @@ const LibraryPage = () => {
         </div>
       </div>
 
-      <AddBookDialog open={isAddOpen} onClose={handleClose} />
+      {isAddOpen && <AddBookDialog onClose={handleClose} />}
 
       <BottomNav />
     </div>
-  )
-}
+  );
+};
 
-export default LibraryPage
+export default LibraryPage;
