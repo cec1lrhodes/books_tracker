@@ -11,6 +11,7 @@ import PlaceholderPage from "@/components/pages/PlaceholderPage";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { getProgressPercent } from "@/data/books";
+import { cn } from "@/lib/utils";
 import { useBookById } from "@/store/useLibrary";
 
 type BookDetailsPageProps = {
@@ -21,11 +22,14 @@ const BookDetailsPage = ({ bookId }: BookDetailsPageProps) => {
   const book = useBookById(bookId);
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const [isThoughtOpen, setIsThoughtOpen] = useState(false);
+  const [expandedThoughtId, setExpandedThoughtId] = useState<string | null>(null);
 
   const handleOpenUpdate = () => setIsUpdateOpen(true);
   const handleCloseUpdate = () => setIsUpdateOpen(false);
   const handleOpenThought = () => setIsThoughtOpen(true);
   const handleCloseThought = () => setIsThoughtOpen(false);
+  const handleToggleThought = (id: string) =>
+    setExpandedThoughtId((current) => (current === id ? null : id));
 
   if (!book) {
     return (
@@ -169,19 +173,43 @@ const BookDetailsPage = ({ bookId }: BookDetailsPageProps) => {
             <p className="text-sm text-muted-foreground">No thoughts yet.</p>
           ) : (
             <ul className="flex flex-col gap-3">
-              {book.thoughts.map((thought) => (
-                <li
-                  key={thought.id}
-                  className="flex items-center gap-3 rounded-xl bg-card px-4 py-3"
-                >
-                  <span className="shrink-0 text-sm font-medium text-foreground">
-                    {thought.label}
-                  </span>
-                  <span className="min-w-0 flex-1 truncate text-right text-sm text-muted-foreground">
-                    {thought.text}
-                  </span>
-                </li>
-              ))}
+              {book.thoughts.map((thought) => {
+                const isExpanded = expandedThoughtId === thought.id;
+                return (
+                  <li key={thought.id}>
+                    <button
+                      type="button"
+                      onClick={() => handleToggleThought(thought.id)}
+                      aria-expanded={isExpanded}
+                      aria-label={
+                        isExpanded ? "Collapse thought" : "Expand thought"
+                      }
+                      className="flex w-full items-start gap-3 rounded-xl bg-card px-4 py-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <span className="shrink-0 text-sm font-medium text-foreground">
+                        {thought.label}
+                      </span>
+                      <div
+                        className={cn(
+                          "grid min-w-0 flex-1 transition-[grid-template-rows] duration-300 ease-out",
+                          isExpanded
+                            ? "grid-rows-[1fr]"
+                            : "grid-rows-[1.25rem]",
+                        )}
+                      >
+                        <p
+                          className={cn(
+                            "overflow-hidden text-right text-sm text-muted-foreground",
+                            isExpanded ? "whitespace-normal" : "truncate",
+                          )}
+                        >
+                          {thought.text}
+                        </p>
+                      </div>
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </section>
