@@ -22,7 +22,9 @@ const BookDetailsPage = ({ bookId }: BookDetailsPageProps) => {
   const book = useBookById(bookId);
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const [isThoughtOpen, setIsThoughtOpen] = useState(false);
-  const [expandedThoughtId, setExpandedThoughtId] = useState<string | null>(null);
+  const [expandedThoughtId, setExpandedThoughtId] = useState<string | null>(
+    null,
+  );
 
   const handleOpenUpdate = () => setIsUpdateOpen(true);
   const handleCloseUpdate = () => setIsUpdateOpen(false);
@@ -191,7 +193,7 @@ const BookDetailsPage = ({ bookId }: BookDetailsPageProps) => {
                       </span>
                       <div
                         className={cn(
-                          "grid min-w-0 flex-1 transition-[grid-template-rows] duration-300 ease-out",
+                          "grid min-w-0 flex-1 transition-[grid-template-rows] duration-500 ease-out",
                           isExpanded
                             ? "grid-rows-[1fr]"
                             : "grid-rows-[1.25rem]",
