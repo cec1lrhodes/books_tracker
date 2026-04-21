@@ -1,18 +1,35 @@
-import { Link } from "@tanstack/react-router";
-import { ChevronLeft } from "lucide-react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import {
+  ChevronLeft,
+  MoreHorizontal,
+  Pencil,
+  Star,
+  Tag,
+  Trash2,
+} from "lucide-react";
 import { useState } from "react";
 
 import AddThoughtDialog from "@/components/book/AddThoughtDialog";
 import BookCover from "@/components/book/BookCover";
+import EditBookDetailsDialog from "@/components/book/EditBookDetailsDialog";
+import EditGenresDialog from "@/components/book/EditGenresDialog";
+import EditRatingDialog from "@/components/book/EditRatingDialog";
 import StarRating from "@/components/book/StarRating";
 import UpdateProgressDialog from "@/components/book/UpdateProgressDialog";
 import BottomNav from "@/components/layout/BottomNav";
 import PlaceholderPage from "@/components/pages/PlaceholderPage";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Progress } from "@/components/ui/progress";
 import { getProgressPercent } from "@/data/books";
 import { cn } from "@/lib/utils";
-import { useBookById } from "@/store/useLibrary";
+import { useBookById, useDeleteBook } from "@/store/useLibrary";
 
 type BookDetailsPageProps = {
   bookId: string;
@@ -20,8 +37,13 @@ type BookDetailsPageProps = {
 
 const BookDetailsPage = ({ bookId }: BookDetailsPageProps) => {
   const book = useBookById(bookId);
+  const deleteBook = useDeleteBook();
+  const navigate = useNavigate();
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const [isThoughtOpen, setIsThoughtOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isRatingOpen, setIsRatingOpen] = useState(false);
+  const [isGenresOpen, setIsGenresOpen] = useState(false);
   const [expandedThoughtId, setExpandedThoughtId] = useState<string | null>(
     null,
   );
@@ -30,6 +52,16 @@ const BookDetailsPage = ({ bookId }: BookDetailsPageProps) => {
   const handleCloseUpdate = () => setIsUpdateOpen(false);
   const handleOpenThought = () => setIsThoughtOpen(true);
   const handleCloseThought = () => setIsThoughtOpen(false);
+  const handleOpenEdit = () => setIsEditOpen(true);
+  const handleCloseEdit = () => setIsEditOpen(false);
+  const handleOpenRating = () => setIsRatingOpen(true);
+  const handleCloseRating = () => setIsRatingOpen(false);
+  const handleOpenGenres = () => setIsGenresOpen(true);
+  const handleCloseGenres = () => setIsGenresOpen(false);
+  const handleDelete = () => {
+    deleteBook(bookId);
+    navigate({ to: "/library" });
+  };
   const handleToggleThought = (id: string) =>
     setExpandedThoughtId((current) => (current === id ? null : id));
 
@@ -46,7 +78,7 @@ const BookDetailsPage = ({ bookId }: BookDetailsPageProps) => {
 
   return (
     <div className="mx-auto flex h-full w-full max-w-md flex-col pb-24">
-      <header className="flex items-center px-4 pt-4">
+      <header className="flex items-center justify-between px-4 pt-4">
         <Link
           to="/library"
           aria-label="Back to library"
@@ -54,6 +86,39 @@ const BookDetailsPage = ({ bookId }: BookDetailsPageProps) => {
         >
           <ChevronLeft className="h-5 w-5" aria-hidden="true" />
         </Link>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              aria-label="Book actions"
+              className="h-10 w-10 rounded-full"
+            >
+              <MoreHorizontal className="h-5 w-5" aria-hidden="true" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuItem onSelect={handleOpenEdit}>
+              <Pencil aria-hidden="true" />
+              Changes
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={handleOpenRating}>
+              <Star aria-hidden="true" />
+              Rate
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={handleOpenGenres}>
+              <Tag aria-hidden="true" />
+              Genre
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem variant="destructive" onSelect={handleDelete}>
+              <Trash2 aria-hidden="true" />
+              Trash
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </header>
 
       <main className="flex-1 overflow-y-auto px-4 pt-2">
@@ -228,6 +293,32 @@ const BookDetailsPage = ({ bookId }: BookDetailsPageProps) => {
 
       {isThoughtOpen && (
         <AddThoughtDialog onClose={handleCloseThought} bookId={book.id} />
+      )}
+
+      {isEditOpen && (
+        <EditBookDetailsDialog
+          onClose={handleCloseEdit}
+          bookId={book.id}
+          initialName={book.name}
+          initialAuthor={book.author}
+          initialTotalPages={book.totalPages}
+        />
+      )}
+
+      {isRatingOpen && (
+        <EditRatingDialog
+          onClose={handleCloseRating}
+          bookId={book.id}
+          initialRating={book.rating}
+        />
+      )}
+
+      {isGenresOpen && (
+        <EditGenresDialog
+          onClose={handleCloseGenres}
+          bookId={book.id}
+          initialGenres={book.genres}
+        />
       )}
 
       <BottomNav />

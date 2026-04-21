@@ -14,11 +14,21 @@ export type NewBookInput = {
   totalPages: number;
 };
 
+export type BookDetailsUpdate = {
+  name: string;
+  author: string;
+  totalPages: number;
+};
+
 type LibraryState = {
   books: Book[];
   addBook: (input: NewBookInput) => void;
   addReadingSession: (bookId: string, pagesRead: number) => void;
   addThought: (bookId: string, text: string) => void;
+  updateBookDetails: (bookId: string, details: BookDetailsUpdate) => void;
+  setBookRating: (bookId: string, rating: number) => void;
+  setBookGenres: (bookId: string, genres: string[]) => void;
+  deleteBook: (bookId: string) => void;
   getBookById: (id: string) => Book | undefined;
 };
 
@@ -93,6 +103,48 @@ export const useLibraryStore = create<LibraryState>()(
             ),
           };
         }),
+      updateBookDetails: (bookId, details) =>
+        set((state) => ({
+          books: state.books.map((book) => {
+            if (book.id !== bookId) return book;
+            const name = details.name.trim();
+            const author = details.author.trim();
+            const totalPages = Math.max(1, Math.floor(details.totalPages));
+            if (name.length === 0 || author.length === 0) return book;
+            const currentPage = Math.min(book.currentPage, totalPages);
+            return {
+              ...book,
+              name,
+              author,
+              totalPages,
+              currentPage,
+              status:
+                currentPage >= totalPages
+                  ? "finished"
+                  : currentPage > 0
+                    ? "reading"
+                    : book.status,
+            };
+          }),
+        })),
+      setBookRating: (bookId, rating) =>
+        set((state) => ({
+          books: state.books.map((book) =>
+            book.id === bookId
+              ? { ...book, rating: Math.max(0, Math.min(5, Math.round(rating))) }
+              : book,
+          ),
+        })),
+      setBookGenres: (bookId, genres) =>
+        set((state) => ({
+          books: state.books.map((book) =>
+            book.id === bookId ? { ...book, genres: [...new Set(genres)] } : book,
+          ),
+        })),
+      deleteBook: (bookId) =>
+        set((state) => ({
+          books: state.books.filter((book) => book.id !== bookId),
+        })),
       getBookById: (id) => get().books.find((book) => book.id === id),
     }),
     {
@@ -129,3 +181,15 @@ export const useAddReadingSession = (): LibraryState["addReadingSession"] =>
 
 export const useAddThought = (): LibraryState["addThought"] =>
   useLibraryStore((state) => state.addThought);
+
+export const useUpdateBookDetails = (): LibraryState["updateBookDetails"] =>
+  useLibraryStore((state) => state.updateBookDetails);
+
+export const useSetBookRating = (): LibraryState["setBookRating"] =>
+  useLibraryStore((state) => state.setBookRating);
+
+export const useSetBookGenres = (): LibraryState["setBookGenres"] =>
+  useLibraryStore((state) => state.setBookGenres);
+
+export const useDeleteBook = (): LibraryState["deleteBook"] =>
+  useLibraryStore((state) => state.deleteBook);
