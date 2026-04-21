@@ -6,6 +6,7 @@ import {
   Star,
   Tag,
   Trash2,
+  ImagePlus,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -104,6 +105,11 @@ const BookDetailsPage = ({ bookId }: BookDetailsPageProps) => {
               <Pencil aria-hidden="true" />
               Changes
             </DropdownMenuItem>
+            {/* TODO: Add photo */}
+            <DropdownMenuItem>
+              <ImagePlus aria-hidden="true" />
+              Add Photo
+            </DropdownMenuItem>
             <DropdownMenuItem onSelect={handleOpenRating}>
               <Star aria-hidden="true" />
               Rate
@@ -112,6 +118,7 @@ const BookDetailsPage = ({ bookId }: BookDetailsPageProps) => {
               <Tag aria-hidden="true" />
               Genre
             </DropdownMenuItem>
+
             <DropdownMenuSeparator />
             <DropdownMenuItem variant="destructive" onSelect={handleDelete}>
               <Trash2 aria-hidden="true" />
