@@ -2,8 +2,8 @@ import { Link } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 
-import BookCover from "@/components/book/BookCover";
-import StarRating from "@/components/book/StarRating";
+import BookCover from "@/components/layout/BookCover";
+import StarRating from "@/components/layout/StarRating";
 import BottomNav from "@/components/layout/BottomNav";
 import AddBookDialog from "@/components/library/AddBookDialog";
 import { Button } from "@/components/ui/button";

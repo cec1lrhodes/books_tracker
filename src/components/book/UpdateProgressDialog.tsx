@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useAddReadingSession } from "@/store/useLibrary";
 
-import FormDialog from "./FormDialog";
+import FormDialog from "../layout/FormDialog";
 
 type UpdateProgressDialogProps = {
   onClose: () => void;

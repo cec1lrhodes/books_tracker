@@ -1,25 +1,25 @@
-import { Link } from "@tanstack/react-router"
+import { Link } from "@tanstack/react-router";
 
-import BookCover from "@/components/book/BookCover"
-import StarRating from "@/components/book/StarRating"
-import BottomNav from "@/components/layout/BottomNav"
-import { Card, CardContent } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { getProgressPercent } from "@/data/books"
-import { useBooks } from "@/store/useLibrary"
+import BookCover from "@/components/layout/BookCover";
+import StarRating from "@/components/layout/StarRating";
+import BottomNav from "@/components/layout/BottomNav";
+import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getProgressPercent } from "@/data/books";
+import { useBooks } from "@/store/useLibrary";
 
 const filterTabs = [
   { value: "all", label: "All" },
   { value: "reading", label: "Reading" },
   { value: "finished", label: "Finished" },
   { value: "planned", label: "Planned" },
-] as const
+] as const;
 
 const MainPage = () => {
-  const books = useBooks()
-  const currentlyReading = books.filter((book) => book.status === "reading")
-  const recentlyFinished = books.filter((book) => book.status === "finished")
+  const books = useBooks();
+  const currentlyReading = books.filter((book) => book.status === "reading");
+  const recentlyFinished = books.filter((book) => book.status === "finished");
 
   return (
     <div className="mx-auto flex h-full w-full max-w-md flex-col pb-24">
@@ -46,7 +46,7 @@ const MainPage = () => {
               const percent = getProgressPercent(
                 book.currentPage,
                 book.totalPages,
-              )
+              );
               return (
                 <li key={book.id}>
                   <Link
@@ -79,7 +79,7 @@ const MainPage = () => {
                     </Card>
                   </Link>
                 </li>
-              )
+              );
             })}
           </ul>
         </section>
@@ -122,7 +122,7 @@ const MainPage = () => {
 
       <BottomNav />
     </div>
-  )
-}
+  );
+};
 
-export default MainPage
+export default MainPage;

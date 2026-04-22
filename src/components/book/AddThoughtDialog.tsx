@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useAddThought } from "@/store/useLibrary";
 
-import FormDialog from "./FormDialog";
+import FormDialog from "../layout/FormDialog";
 
 type AddThoughtDialogProps = {
   onClose: () => void;

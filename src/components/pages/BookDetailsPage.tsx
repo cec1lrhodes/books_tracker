@@ -11,11 +11,11 @@ import {
 import { useState } from "react";
 
 import AddThoughtDialog from "@/components/book/AddThoughtDialog";
-import BookCover from "@/components/book/BookCover";
+import BookCover from "@/components/layout/BookCover";
 import EditBookDetailsDialog from "@/components/book/EditBookDetailsDialog";
 import EditGenresDialog from "@/components/book/EditGenresDialog";
 import EditRatingDialog from "@/components/book/EditRatingDialog";
-import StarRating from "@/components/book/StarRating";
+import StarRating from "@/components/layout/StarRating";
 import UpdateProgressDialog from "@/components/book/UpdateProgressDialog";
 import BottomNav from "@/components/layout/BottomNav";
 import PlaceholderPage from "@/components/pages/PlaceholderPage";

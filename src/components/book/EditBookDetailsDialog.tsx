@@ -1,4 +1,4 @@
-import AddAndEditBookDialog from "@/components/book/AddAndEditBookDialog";
+import AddAndEditBookDialog from "@/components/layout/AddAndEditBookDialog";
 import { useUpdateBookDetails } from "@/store/useLibrary";
 
 type EditBookDetailsDialogProps = {
