@@ -1,37 +1,21 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import {
-  ChevronLeft,
-  ImageOff,
-  ImagePlus,
-  MoreHorizontal,
-  Pencil,
-  Star,
-  Tag,
-  Trash2,
-} from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { useState } from "react";
 
 import AddThoughtDialog from "@/components/book/AddThoughtDialog";
-import BookCover from "@/components/layout/BookCover";
+import BookActionsMenu from "@/components/book/BookActionsMenu";
+import BookHeroSection from "@/components/book/BookHeroSection";
+import BookProgressSection from "@/components/book/BookProgressSection";
 import EditBookDetailsDialog from "@/components/book/EditBookDetailsDialog";
 import EditGenresDialog from "@/components/book/EditGenresDialog";
 import EditRatingDialog from "@/components/book/EditRatingDialog";
-import StarRating from "@/components/layout/StarRating";
+import ReadingSessionsSection from "@/components/book/ReadingSessionsSection";
+import ThoughtsSection from "@/components/book/ThoughtsSection";
 import UpdateProgressDialog from "@/components/book/UpdateProgressDialog";
 import BottomNav from "@/components/layout/BottomNav";
 import PlaceholderPage from "@/components/pages/PlaceholderPage";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Progress } from "@/components/ui/progress";
-import { getProgressPercent } from "@/data/books";
 import { useImagePicker } from "@/hooks/useImagePicker";
-import { cn } from "@/lib/utils";
 import {
   useBookById,
   useDeleteBook,
@@ -55,9 +39,6 @@ const BookDetailsPage = ({ bookId }: BookDetailsPageProps) => {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isRatingOpen, setIsRatingOpen] = useState(false);
   const [isGenresOpen, setIsGenresOpen] = useState(false);
-  const [expandedThoughtId, setExpandedThoughtId] = useState<string | null>(
-    null,
-  );
 
   const handleOpenUpdate = () => setIsUpdateOpen(true);
   const handleCloseUpdate = () => setIsUpdateOpen(false);
@@ -74,8 +55,6 @@ const BookDetailsPage = ({ bookId }: BookDetailsPageProps) => {
     navigate({ to: "/library" });
   };
   const handleRemoveCover = () => setBookCover(bookId, undefined);
-  const handleToggleThought = (id: string) =>
-    setExpandedThoughtId((current) => (current === id ? null : id));
 
   if (!book) {
     return (
@@ -85,8 +64,6 @@ const BookDetailsPage = ({ bookId }: BookDetailsPageProps) => {
       />
     );
   }
-
-  const percent = getProgressPercent(book.currentPage, book.totalPages);
 
   return (
     <div className="mx-auto flex h-full w-full max-w-md flex-col pb-24">
@@ -99,49 +76,15 @@ const BookDetailsPage = ({ bookId }: BookDetailsPageProps) => {
           <ChevronLeft className="h-5 w-5" aria-hidden="true" />
         </Link>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              aria-label="Book actions"
-              className="h-10 w-10 rounded-full"
-            >
-              <MoreHorizontal className="h-5 w-5" aria-hidden="true" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem onSelect={handleOpenEdit}>
-              <Pencil aria-hidden="true" />
-              Changes
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={handleOpenPicker}>
-              <ImagePlus aria-hidden="true" />
-              {book.coverImage ? "Change photo" : "Add photo"}
-            </DropdownMenuItem>
-            {book.coverImage && (
-              <DropdownMenuItem onSelect={handleRemoveCover}>
-                <ImageOff aria-hidden="true" />
-                Remove photo
-              </DropdownMenuItem>
-            )}
-            <DropdownMenuItem onSelect={handleOpenRating}>
-              <Star aria-hidden="true" />
-              Rate
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={handleOpenGenres}>
-              <Tag aria-hidden="true" />
-              Genre
-            </DropdownMenuItem>
-
-            <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive" onSelect={handleDelete}>
-              <Trash2 aria-hidden="true" />
-              Trash
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <BookActionsMenu
+          hasCover={Boolean(book.coverImage)}
+          onEdit={handleOpenEdit}
+          onChangeCover={handleOpenPicker}
+          onRemoveCover={handleRemoveCover}
+          onRate={handleOpenRating}
+          onChangeGenres={handleOpenGenres}
+          onDelete={handleDelete}
+        />
       </header>
 
       <input
@@ -153,61 +96,9 @@ const BookDetailsPage = ({ bookId }: BookDetailsPageProps) => {
       />
 
       <main className="flex-1 overflow-y-auto px-4 pt-2">
-        <section className="flex flex-col items-center text-center">
-          <BookCover
-            className="h-52 w-36"
-            src={book.coverImage}
-            alt={`${book.name} cover`}
-            showPlaceholderIcon
-          />
-          <h1 className="mt-5 text-2xl font-semibold tracking-tight text-foreground">
-            {book.name}
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {book.author} · {book.year}
-          </p>
-          <div className="mt-3 flex items-center gap-2">
-            <StarRating value={book.rating} />
-            <span className="text-sm text-muted-foreground">
-              {book.rating.toFixed(1)}
-            </span>
-          </div>
-          <ul className="mt-4 flex flex-wrap justify-center gap-2">
-            {book.genres.map((genre) => (
-              <li
-                key={genre}
-                className="rounded-full border border-border px-3 py-1 text-xs text-foreground"
-              >
-                {genre}
-              </li>
-            ))}
-          </ul>
-        </section>
+        <BookHeroSection book={book} />
 
-        <section aria-labelledby="progress-heading" className="mt-8">
-          <div className="flex items-center justify-between">
-            <h2
-              id="progress-heading"
-              className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
-            >
-              Progress
-            </h2>
-            <span className="text-sm font-medium text-foreground">
-              {book.currentPage} / {book.totalPages} pages
-            </span>
-          </div>
-          <Progress value={percent} className="mt-3" />
-          <div className="mt-2 flex items-center justify-between text-xs">
-            {book.startedAt ? (
-              <span className="text-muted-foreground">
-                Started {book.startedAt}
-              </span>
-            ) : (
-              <span />
-            )}
-            <span className="font-semibold text-foreground">{percent}%</span>
-          </div>
-        </section>
+        <BookProgressSection book={book} />
 
         <Button
           type="button"
@@ -226,96 +117,9 @@ const BookDetailsPage = ({ bookId }: BookDetailsPageProps) => {
           Add thought
         </Button>
 
-        <section aria-labelledby="sessions-heading" className="mt-8">
-          <h2
-            id="sessions-heading"
-            className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground"
-          >
-            Reading sessions
-          </h2>
-          {book.sessions.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No sessions yet.</p>
-          ) : (
-            <ul className="flex flex-col gap-3">
-              {book.sessions.map((session) => (
-                <li
-                  key={session.id}
-                  className="flex items-center justify-between rounded-xl bg-card px-4 py-3"
-                >
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium text-foreground">
-                      {session.label}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      pp. {session.fromPage} – {session.toPage}
-                    </span>
-                  </div>
-                  {session.minutes ? (
-                    <span className="text-sm text-muted-foreground">
-                      {session.minutes} min
-                    </span>
-                  ) : (
-                    <span className="text-sm font-medium text-foreground">
-                      +{session.toPage - session.fromPage} pp
-                    </span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+        <ReadingSessionsSection sessions={book.sessions} />
 
-        <section aria-labelledby="thoughts-heading" className="mt-8">
-          <h2
-            id="thoughts-heading"
-            className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground"
-          >
-            Thoughts
-          </h2>
-          {book.thoughts.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No thoughts yet.</p>
-          ) : (
-            <ul className="flex flex-col gap-3">
-              {book.thoughts.map((thought) => {
-                const isExpanded = expandedThoughtId === thought.id;
-                return (
-                  <li key={thought.id}>
-                    <button
-                      type="button"
-                      onClick={() => handleToggleThought(thought.id)}
-                      aria-expanded={isExpanded}
-                      aria-label={
-                        isExpanded ? "Collapse thought" : "Expand thought"
-                      }
-                      className="flex w-full items-start gap-3 rounded-xl bg-card px-4 py-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                      <span className="shrink-0 text-sm font-medium text-foreground">
-                        {thought.label}
-                      </span>
-                      <div
-                        className={cn(
-                          "grid min-w-0 flex-1 transition-[grid-template-rows] duration-500 ease-out",
-                          isExpanded
-                            ? "grid-rows-[1fr]"
-                            : "grid-rows-[1.25rem]",
-                        )}
-                      >
-                        <p
-                          className={cn(
-                            "overflow-hidden text-right text-sm text-muted-foreground",
-                            isExpanded ? "whitespace-normal" : "truncate",
-                          )}
-                        >
-                          {thought.text}
-                        </p>
-                      </div>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </section>
+        <ThoughtsSection thoughts={book.thoughts} />
       </main>
 
       {isUpdateOpen && (

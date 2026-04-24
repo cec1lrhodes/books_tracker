@@ -1,13 +1,12 @@
 import { useState } from "react";
-import { Link } from "@tanstack/react-router";
 
-import BookCover from "@/components/layout/BookCover";
-import StarRating from "@/components/layout/StarRating";
+import BookListItem from "@/components/layout/BookListItem";
 import BottomNav from "@/components/layout/BottomNav";
-import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import ReadingProgress from "@/components/layout/ReadingProgress";
+import SectionHeading from "@/components/layout/SectionHeading";
+import StarRating from "@/components/layout/StarRating";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getProgressPercent, type Book, type BookStatus } from "@/data/books";
+import { type Book, type BookStatus } from "@/data/books";
 import { useBooks } from "@/store/useLibrary";
 
 type FilterValue = "all" | BookStatus;
@@ -25,35 +24,36 @@ const filterSectionTitles: Record<Exclude<FilterValue, "all">, string> = {
   planned: "Planned",
 };
 
+const buildSimpleSubtitle = (book: Book) =>
+  book.finishedAgo ? `${book.author} · ${book.finishedAgo}` : book.author;
+
 const renderSimpleBookItem = (book: Book) => (
-  <li key={book.id}>
-    <Link
-      to="/library/$bookId"
-      params={{ bookId: book.id }}
-      aria-label={`Open ${book.name}`}
-      className="block rounded-2xl transition-transform active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-    >
-      <Card>
-        <CardContent className="flex items-center gap-3">
-          <BookCover
-            className="h-20 w-14"
-            src={book.coverImage}
-            alt={`${book.name} cover`}
-          />
-          <div className="flex min-w-0 flex-1 flex-col gap-1">
-            <p className="truncate text-base font-semibold text-foreground">
-              {book.name}
-            </p>
-            <p className="truncate text-sm text-muted-foreground">
-              {book.author}
-              {book.finishedAgo ? ` · ${book.finishedAgo}` : ""}
-            </p>
-          </div>
-          <StarRating value={book.rating} />
-        </CardContent>
-      </Card>
-    </Link>
-  </li>
+  <BookListItem
+    key={book.id}
+    book={book}
+    subtitle={buildSimpleSubtitle(book)}
+    trailing={<StarRating value={book.rating} />}
+  />
+);
+
+const renderReadingBookItem = (book: Book) => (
+  <BookListItem
+    key={book.id}
+    book={book}
+    subtitle={book.author}
+    extra={
+      <>
+        <p className="text-xs text-muted-foreground">
+          p. {book.currentPage} / {book.totalPages}
+        </p>
+        <ReadingProgress
+          currentPage={book.currentPage}
+          totalPages={book.totalPages}
+          className="mt-1"
+        />
+      </>
+    }
+  />
 );
 
 const MainPage = () => {
@@ -89,12 +89,9 @@ const MainPage = () => {
 
         {activeFilter !== "all" && (
           <section aria-labelledby="filtered-books" className="mt-5">
-            <h2
-              id="filtered-books"
-              className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground"
-            >
+            <SectionHeading id="filtered-books" className="mb-2">
               {filterSectionTitles[activeFilter]}
-            </h2>
+            </SectionHeading>
             {filteredBooks.length === 0 ? (
               <p className="text-sm text-muted-foreground">
                 No books in this category yet.
@@ -110,66 +107,18 @@ const MainPage = () => {
         {activeFilter === "all" && (
           <>
             <section aria-labelledby="currently-reading" className="mt-5">
-              <h2
-                id="currently-reading"
-                className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground"
-              >
+              <SectionHeading id="currently-reading" className="mb-2">
                 Currently reading
-              </h2>
+              </SectionHeading>
               <ul className="flex flex-col gap-3">
-                {currentlyReading.map((book) => {
-                  const percent = getProgressPercent(
-                    book.currentPage,
-                    book.totalPages,
-                  );
-                  return (
-                    <li key={book.id}>
-                      <Link
-                        to="/library/$bookId"
-                        params={{ bookId: book.id }}
-                        aria-label={`Open ${book.name}`}
-                        className="block rounded-2xl transition-transform active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                      >
-                        <Card>
-                          <CardContent className="flex items-center gap-3">
-                            <BookCover
-                              className="h-20 w-14"
-                              src={book.coverImage}
-                              alt={`${book.name} cover`}
-                            />
-                            <div className="flex min-w-0 flex-1 flex-col gap-1">
-                              <p className="truncate text-base font-semibold text-foreground">
-                                {book.name}
-                              </p>
-                              <p className="truncate text-sm text-muted-foreground">
-                                {book.author}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                p. {book.currentPage} / {book.totalPages}
-                              </p>
-                              <div className="mt-1 flex items-center gap-2">
-                                <Progress value={percent} className="flex-1" />
-                                <span className="text-xs font-medium text-foreground">
-                                  {percent}%
-                                </span>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </Link>
-                    </li>
-                  );
-                })}
+                {currentlyReading.map(renderReadingBookItem)}
               </ul>
             </section>
 
             <section aria-labelledby="recently-finished" className="mt-6">
-              <h2
-                id="recently-finished"
-                className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground"
-              >
+              <SectionHeading id="recently-finished" className="mb-2">
                 Recently finished
-              </h2>
+              </SectionHeading>
               <ul className="flex flex-col gap-3">
                 {recentlyFinished.map(renderSimpleBookItem)}
               </ul>

@@ -1,16 +1,36 @@
-import { Link } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 
-import BookCover from "@/components/layout/BookCover";
-import StarRating from "@/components/layout/StarRating";
+import BookListItem from "@/components/layout/BookListItem";
 import BottomNav from "@/components/layout/BottomNav";
+import ReadingProgress from "@/components/layout/ReadingProgress";
+import StarRating from "@/components/layout/StarRating";
 import AddBookDialog from "@/components/library/AddBookDialog";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { getProgressPercent } from "@/data/books";
+import { type Book } from "@/data/books";
 import { useBooks } from "@/store/useLibrary";
+
+const renderBookExtra = (book: Book) => {
+  if (book.status === "reading") {
+    return (
+      <ReadingProgress
+        currentPage={book.currentPage}
+        totalPages={book.totalPages}
+        className="mt-1"
+      />
+    );
+  }
+  return <StarRating value={book.rating} className="mt-1" />;
+};
+
+const renderLibraryBookItem = (book: Book) => (
+  <BookListItem
+    key={book.id}
+    book={book}
+    subtitle={`${book.author} · ${book.year}`}
+    extra={renderBookExtra(book)}
+  />
+);
 
 const LibraryPage = () => {
   const books = useBooks();
@@ -26,50 +46,7 @@ const LibraryPage = () => {
           Library
         </h1>
         <ul className="flex flex-col gap-3">
-          {books.map((book) => {
-            const percent = getProgressPercent(
-              book.currentPage,
-              book.totalPages,
-            );
-            return (
-              <li key={book.id}>
-                <Link
-                  to="/library/$bookId"
-                  params={{ bookId: book.id }}
-                  aria-label={`Open ${book.name}`}
-                  className="block rounded-2xl transition-transform active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <Card>
-                    <CardContent className="flex items-center gap-3">
-                      <BookCover
-                        className="h-20 w-14"
-                        src={book.coverImage}
-                        alt={`${book.name} cover`}
-                      />
-                      <div className="flex min-w-0 flex-1 flex-col gap-1">
-                        <p className="truncate text-base font-semibold text-foreground">
-                          {book.name}
-                        </p>
-                        <p className="truncate text-sm text-muted-foreground">
-                          {book.author} · {book.year}
-                        </p>
-                        {book.status === "reading" ? (
-                          <div className="mt-1 flex items-center gap-2">
-                            <Progress value={percent} className="flex-1" />
-                            <span className="text-xs font-medium text-foreground">
-                              {percent}%
-                            </span>
-                          </div>
-                        ) : (
-                          <StarRating value={book.rating} className="mt-1" />
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              </li>
-            );
-          })}
+          {books.map(renderLibraryBookItem)}
         </ul>
       </main>
 
