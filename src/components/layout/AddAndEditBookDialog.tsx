@@ -1,6 +1,8 @@
 import { useState } from "react"
 
+import BookCover from "@/components/layout/BookCover"
 import { Input } from "@/components/ui/input"
+import { useImagePicker } from "@/hooks/useImagePicker"
 
 import FormDialog from "./FormDialog"
 
@@ -8,12 +10,14 @@ export type BookFormValues = {
   name: string
   author: string
   totalPages: number
+  coverImage?: string
 }
 
 type BookFormInitialValues = {
   name?: string
   author?: string
   totalPages?: number
+  coverImage?: string
 }
 
 type BookFormPlaceholders = {
@@ -30,6 +34,7 @@ type AddAndEditBookDialogProps = {
   onSubmit: (values: BookFormValues) => void
   initialValues?: BookFormInitialValues
   placeholders?: BookFormPlaceholders
+  enableCover?: boolean
 }
 
 const DEFAULT_PLACEHOLDERS: Required<BookFormPlaceholders> = {
@@ -48,6 +53,7 @@ const AddAndEditBookDialog = ({
   onSubmit,
   initialValues,
   placeholders,
+  enableCover = false,
 }: AddAndEditBookDialogProps) => {
   const [name, setName] = useState(initialValues?.name ?? "")
   const [author, setAuthor] = useState(initialValues?.author ?? "")
@@ -55,6 +61,13 @@ const AddAndEditBookDialog = ({
     initialValues?.totalPages !== undefined
       ? String(initialValues.totalPages)
       : "",
+  )
+  const [coverImage, setCoverImage] = useState<string | undefined>(
+    initialValues?.coverImage,
+  )
+
+  const { inputRef, error, handleOpenPicker, handleChange } = useImagePicker(
+    (dataUrl) => setCoverImage(dataUrl),
   )
 
   const parsedTotalPages = Number.parseInt(totalPages, 10)
@@ -72,8 +85,16 @@ const AddAndEditBookDialog = ({
       name: name.trim(),
       author: author.trim(),
       totalPages: parsedTotalPages,
+      coverImage,
     })
     onClose()
+  }
+
+  const handleCoverKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault()
+      handleOpenPicker()
+    }
   }
 
   return (
@@ -86,6 +107,36 @@ const AddAndEditBookDialog = ({
       onClose={onClose}
       onSubmit={handleSubmit}
     >
+      {enableCover && (
+        <div className="flex flex-col items-center gap-1.5">
+          <button
+            type="button"
+            onClick={handleOpenPicker}
+            onKeyDown={handleCoverKeyDown}
+            tabIndex={0}
+            aria-label={coverImage ? "Change book cover" : "Add book cover"}
+            className="rounded-md transition hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <BookCover
+              className="h-32 w-24"
+              src={coverImage}
+              alt="Book cover preview"
+              showPlaceholderIcon
+            />
+          </button>
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleChange}
+          />
+          {error && (
+            <span className="text-xs text-destructive">{error}</span>
+          )}
+        </div>
+      )}
+
       <label className="flex flex-col gap-1.5">
         <span className="text-xs font-medium text-muted-foreground">
           Title

@@ -1,4 +1,6 @@
-import AddAndEditBookDialog from "@/components/layout/AddAndEditBookDialog";
+import AddAndEditBookDialog, {
+  type BookFormValues,
+} from "@/components/layout/AddAndEditBookDialog";
 import { useAddBook } from "@/store/useLibrary";
 
 type AddBookDialogProps = {
@@ -8,11 +10,7 @@ type AddBookDialogProps = {
 const AddBookDialog = ({ onClose }: AddBookDialogProps) => {
   const addBook = useAddBook();
 
-  const handleSubmit = (values: {
-    name: string;
-    author: string;
-    totalPages: number;
-  }) => {
+  const handleSubmit = (values: BookFormValues) => {
     addBook(values);
   };
 
@@ -23,6 +21,7 @@ const AddBookDialog = ({ onClose }: AddBookDialogProps) => {
       ariaLabelClose="Close add book dialog"
       onClose={onClose}
       onSubmit={handleSubmit}
+      enableCover
       placeholders={{
         name: "The Great Gatsby",
         author: "F. Scott Fitzgerald",

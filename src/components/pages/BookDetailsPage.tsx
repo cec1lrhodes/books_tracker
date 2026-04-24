@@ -1,12 +1,13 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
   ChevronLeft,
+  ImageOff,
+  ImagePlus,
   MoreHorizontal,
   Pencil,
   Star,
   Tag,
   Trash2,
-  ImagePlus,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -29,8 +30,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Progress } from "@/components/ui/progress";
 import { getProgressPercent } from "@/data/books";
+import { useImagePicker } from "@/hooks/useImagePicker";
 import { cn } from "@/lib/utils";
-import { useBookById, useDeleteBook } from "@/store/useLibrary";
+import {
+  useBookById,
+  useDeleteBook,
+  useSetBookCover,
+} from "@/store/useLibrary";
 
 type BookDetailsPageProps = {
   bookId: string;
@@ -39,7 +45,11 @@ type BookDetailsPageProps = {
 const BookDetailsPage = ({ bookId }: BookDetailsPageProps) => {
   const book = useBookById(bookId);
   const deleteBook = useDeleteBook();
+  const setBookCover = useSetBookCover();
   const navigate = useNavigate();
+  const { inputRef, handleOpenPicker, handleChange } = useImagePicker(
+    (dataUrl) => setBookCover(bookId, dataUrl),
+  );
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const [isThoughtOpen, setIsThoughtOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -63,6 +73,7 @@ const BookDetailsPage = ({ bookId }: BookDetailsPageProps) => {
     deleteBook(bookId);
     navigate({ to: "/library" });
   };
+  const handleRemoveCover = () => setBookCover(bookId, undefined);
   const handleToggleThought = (id: string) =>
     setExpandedThoughtId((current) => (current === id ? null : id));
 
@@ -105,11 +116,16 @@ const BookDetailsPage = ({ bookId }: BookDetailsPageProps) => {
               <Pencil aria-hidden="true" />
               Changes
             </DropdownMenuItem>
-            {/* TODO: Add photo */}
-            <DropdownMenuItem>
+            <DropdownMenuItem onSelect={handleOpenPicker}>
               <ImagePlus aria-hidden="true" />
-              Add Photo
+              {book.coverImage ? "Change photo" : "Add photo"}
             </DropdownMenuItem>
+            {book.coverImage && (
+              <DropdownMenuItem onSelect={handleRemoveCover}>
+                <ImageOff aria-hidden="true" />
+                Remove photo
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem onSelect={handleOpenRating}>
               <Star aria-hidden="true" />
               Rate
@@ -128,9 +144,22 @@ const BookDetailsPage = ({ bookId }: BookDetailsPageProps) => {
         </DropdownMenu>
       </header>
 
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleChange}
+      />
+
       <main className="flex-1 overflow-y-auto px-4 pt-2">
         <section className="flex flex-col items-center text-center">
-          <BookCover className="h-52 w-36" />
+          <BookCover
+            className="h-52 w-36"
+            src={book.coverImage}
+            alt={`${book.name} cover`}
+            showPlaceholderIcon
+          />
           <h1 className="mt-5 text-2xl font-semibold tracking-tight text-foreground">
             {book.name}
           </h1>

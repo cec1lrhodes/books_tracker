@@ -28,6 +28,7 @@ export type Book = {
   finishedAgo?: string;
   sessions: ReadingSession[];
   thoughts: Thought[];
+  coverImage?: string;
 };
 
 export const books: Book[] = [

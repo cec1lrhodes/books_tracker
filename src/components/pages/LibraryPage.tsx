@@ -41,7 +41,11 @@ const LibraryPage = () => {
                 >
                   <Card>
                     <CardContent className="flex items-center gap-3">
-                      <BookCover className="h-20 w-14" />
+                      <BookCover
+                        className="h-20 w-14"
+                        src={book.coverImage}
+                        alt={`${book.name} cover`}
+                      />
                       <div className="flex min-w-0 flex-1 flex-col gap-1">
                         <p className="truncate text-base font-semibold text-foreground">
                           {book.name}

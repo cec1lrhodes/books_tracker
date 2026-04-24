@@ -12,6 +12,7 @@ export type NewBookInput = {
   name: string;
   author: string;
   totalPages: number;
+  coverImage?: string;
 };
 
 export type BookDetailsUpdate = {
@@ -28,6 +29,7 @@ type LibraryState = {
   updateBookDetails: (bookId: string, details: BookDetailsUpdate) => void;
   setBookRating: (bookId: string, rating: number) => void;
   setBookGenres: (bookId: string, genres: string[]) => void;
+  setBookCover: (bookId: string, coverImage: string | undefined) => void;
   deleteBook: (bookId: string) => void;
   getBookById: (id: string) => Book | undefined;
 };
@@ -39,7 +41,12 @@ const slugify = (value: string): string =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "") || "book";
 
-const createBook = ({ name, author, totalPages }: NewBookInput): Book => ({
+const createBook = ({
+  name,
+  author,
+  totalPages,
+  coverImage,
+}: NewBookInput): Book => ({
   id: `${slugify(name)}-${Date.now()}`,
   name,
   author,
@@ -51,6 +58,7 @@ const createBook = ({ name, author, totalPages }: NewBookInput): Book => ({
   status: "planned",
   sessions: [],
   thoughts: [],
+  coverImage,
 });
 
 const formatDayLabel = (date: Date): string =>
@@ -141,6 +149,12 @@ export const useLibraryStore = create<LibraryState>()(
             book.id === bookId ? { ...book, genres: [...new Set(genres)] } : book,
           ),
         })),
+      setBookCover: (bookId, coverImage) =>
+        set((state) => ({
+          books: state.books.map((book) =>
+            book.id === bookId ? { ...book, coverImage } : book,
+          ),
+        })),
       deleteBook: (bookId) =>
         set((state) => ({
           books: state.books.filter((book) => book.id !== bookId),
@@ -190,6 +204,9 @@ export const useSetBookRating = (): LibraryState["setBookRating"] =>
 
 export const useSetBookGenres = (): LibraryState["setBookGenres"] =>
   useLibraryStore((state) => state.setBookGenres);
+
+export const useSetBookCover = (): LibraryState["setBookCover"] =>
+  useLibraryStore((state) => state.setBookCover);
 
 export const useDeleteBook = (): LibraryState["deleteBook"] =>
   useLibraryStore((state) => state.deleteBook);
