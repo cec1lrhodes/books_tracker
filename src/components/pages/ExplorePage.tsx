@@ -1,83 +1,82 @@
-import { useMemo, useState } from "react"
+import { useMemo, useState } from "react";
 
-import ExploreBooksSection from "@/components/explore/ExploreBooksSection"
-import ExploreTabs from "@/components/explore/ExploreTabs"
-import GenreSelectorCard from "@/components/explore/GenreSelectorCard"
-import BottomNav from "@/components/layout/BottomNav"
-import { GENRES, type Genre } from "@/data/genres"
-import { useExploreBooks } from "@/hooks/useExploreBooks"
-import { useBooks } from "@/store/useLibrary"
-import { type ExploreFilter } from "@/types/explore"
+import ExploreBooksSection from "@/components/explore/ExploreBooksSection";
+import ExploreTabs from "@/components/explore/ExploreTabs";
+import GenreSelectorCard from "@/components/explore/GenreSelectorCard";
+import BottomNav from "@/components/layout/BottomNav";
+import { GENRES, type Genre } from "@/data/genres";
+import { useExploreBooks } from "@/hooks/useExploreBooks";
+import { useBooks } from "@/store/useLibrary";
+import { type ExploreFilter } from "@/types/explore";
 
-const getRandomGenre = () =>
-  GENRES[Math.floor(Math.random() * GENRES.length)]
+const getRandomGenre = () => GENRES[Math.floor(Math.random() * GENRES.length)];
 
-const sessionRandomGenre = getRandomGenre()
+const sessionRandomGenre = getRandomGenre();
 
 const ExplorePage = () => {
-  const libraryBooks = useBooks()
-  const [activeFilter, setActiveFilter] = useState<ExploreFilter>("recommendation")
-  const [selectedGenres, setSelectedGenres] = useState<Genre[]>([])
-  const [allGenre] = useState<Genre>(sessionRandomGenre)
+  const libraryBooks = useBooks();
+  const [activeFilter, setActiveFilter] =
+    useState<ExploreFilter>("recommendation");
+  const [selectedGenres, setSelectedGenres] = useState<Genre[]>([]);
+  const [allGenre] = useState<Genre>(sessionRandomGenre);
 
   const recommendedGenre = useMemo(() => {
-    const genreScores = libraryBooks.reduce<Record<string, number>>((scores, book) => {
-      book.genres.forEach((genre) => {
-        scores[genre] = (scores[genre] ?? 0) + 1 + book.rating * 0.2
-      })
+    const genreScores = libraryBooks.reduce<Record<string, number>>(
+      (scores, book) => {
+        book.genres.forEach((genre) => {
+          scores[genre] = (scores[genre] ?? 0) + 1 + book.rating * 0.2;
+        });
 
-      return scores
-    }, {})
+        return scores;
+      },
+      {},
+    );
 
     const [bestGenre] =
-      Object.entries(genreScores).sort(([, firstScore], [, secondScore]) => secondScore - firstScore)[0] ?? []
+      Object.entries(genreScores).sort(
+        ([, firstScore], [, secondScore]) => secondScore - firstScore,
+      )[0] ?? [];
 
     if (bestGenre && GENRES.includes(bestGenre as Genre)) {
-      return bestGenre as Genre
+      return bestGenre as Genre;
     }
 
-    return allGenre
-  }, [allGenre, libraryBooks])
+    return allGenre;
+  }, [allGenre, libraryBooks]);
 
   const activeGenres = useMemo(() => {
-    if (activeFilter === "recommendation") return [recommendedGenre]
-    if (activeFilter === "all") return [allGenre]
-    return selectedGenres
-  }, [activeFilter, allGenre, recommendedGenre, selectedGenres])
-  const {
-    books,
-    isLoading,
-    isLoadingMore,
-    errorMessage,
-    hasMore,
-    loadMore,
-  } = useExploreBooks(activeGenres)
+    if (activeFilter === "recommendation") return [recommendedGenre];
+    if (activeFilter === "all") return [allGenre];
+    return selectedGenres;
+  }, [activeFilter, allGenre, recommendedGenre, selectedGenres]);
+  const { books, isLoading, isLoadingMore, errorMessage, hasMore, loadMore } =
+    useExploreBooks(activeGenres);
 
   const sectionTitle = useMemo(() => {
     if (activeFilter === "recommendation") {
-      return `Because you read ${recommendedGenre}`
+      return `Because you read ${recommendedGenre}`;
     }
 
     if (activeFilter === "all") {
-      return "Random books"
+      return "Random books";
     }
 
     if (selectedGenres.length === 0) {
-      return "Choose genres"
+      return "Choose genres";
     }
 
-    return selectedGenres.join(", ")
-  }, [activeFilter, recommendedGenre, selectedGenres])
+    return selectedGenres.join(", ");
+  }, [activeFilter, recommendedGenre, selectedGenres]);
 
   const handleFilterChange = (value: string) =>
-    setActiveFilter(value as ExploreFilter)
+    setActiveFilter(value as ExploreFilter);
 
   const handleToggleGenre = (genre: Genre) =>
     setSelectedGenres((current) =>
       current.includes(genre)
         ? current.filter((item) => item !== genre)
         : [...current, genre],
-    )
+    );
 
   return (
     <div className="mx-auto flex h-full w-full max-w-md flex-col pb-24">
@@ -114,7 +113,7 @@ const ExplorePage = () => {
 
       <BottomNav />
     </div>
-  )
-}
+  );
+};
 
-export default ExplorePage
+export default ExplorePage;
