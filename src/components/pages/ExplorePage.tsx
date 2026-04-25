@@ -42,7 +42,14 @@ const ExplorePage = () => {
     if (activeFilter === "all") return [allGenre]
     return selectedGenres
   }, [activeFilter, allGenre, recommendedGenre, selectedGenres])
-  const { books, isLoading, errorMessage } = useExploreBooks(activeGenres)
+  const {
+    books,
+    isLoading,
+    isLoadingMore,
+    errorMessage,
+    hasMore,
+    loadMore,
+  } = useExploreBooks(activeGenres)
 
   const sectionTitle = useMemo(() => {
     if (activeFilter === "recommendation") {
@@ -96,7 +103,10 @@ const ExplorePage = () => {
           title={sectionTitle}
           books={books}
           isLoading={isLoading}
+          isLoadingMore={isLoadingMore}
           errorMessage={errorMessage}
+          hasMore={hasMore}
+          onLoadMore={loadMore}
         />
       </main>
 

@@ -17,6 +17,11 @@ type OpenLibrarySubjectResponse = {
   works?: OpenLibraryWork[];
 };
 
+type OpenLibraryBooksResponse = {
+  books: ExploreBook[];
+  hasMore: boolean;
+};
+
 const genreSubjects: Record<Genre, string> = {
   Classic: "classic_literature",
   Fantasy: "fantasy",
@@ -40,8 +45,12 @@ const genreSubjects: Record<Genre, string> = {
   "Young Adult": "young_adult",
 };
 
-const getOpenLibrarySubjectUrl = (subject: string) =>
-  `https://openlibrary.org/subjects/${subject}.json?limit=18`;
+const getOpenLibrarySubjectUrl = (
+  subject: string,
+  limit: number,
+  offset: number,
+) =>
+  `https://openlibrary.org/subjects/${subject}.json?limit=${limit}&offset=${offset}`;
 
 const getCoverUrl = (coverId: number | undefined) => {
   if (!coverId) return undefined;
@@ -76,10 +85,12 @@ const shuffleBooks = (books: ExploreBook[]) =>
 export const fetchOpenLibraryBooksByGenres = async (
   genres: Genre[],
   signal: AbortSignal,
-) => {
+  limit: number,
+  offset: number,
+): Promise<OpenLibraryBooksResponse> => {
   const responses = await Promise.all(
     genres.map((genre) =>
-      fetch(getOpenLibrarySubjectUrl(genreSubjects[genre]), {
+      fetch(getOpenLibrarySubjectUrl(genreSubjects[genre], limit, offset), {
         signal,
       }),
     ),
@@ -94,6 +105,7 @@ export const fetchOpenLibraryBooksByGenres = async (
   const data = (await Promise.all(
     responses.map((response) => response.json()),
   )) as OpenLibrarySubjectResponse[];
+  const hasMore = data.some((subject) => (subject.works?.length ?? 0) >= limit);
 
   const nextBooks = data
     .flatMap((subject) => subject.works ?? [])
@@ -104,5 +116,8 @@ export const fetchOpenLibraryBooksByGenres = async (
     new Map(nextBooks.map((book) => [book.id, book])).values(),
   );
 
-  return shuffleBooks(uniqueBooks).slice(0, 12);
+  return {
+    books: shuffleBooks(uniqueBooks).slice(0, limit),
+    hasMore,
+  };
 };
