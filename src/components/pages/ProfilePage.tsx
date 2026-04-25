@@ -1,8 +1,21 @@
+import { useMemo } from "react";
+
 import BottomNav from "@/components/layout/BottomNav";
 import ReadingProgress from "@/components/layout/ReadingProgress";
 import SectionHeading from "@/components/layout/SectionHeading";
+import ReadingActivityChart from "@/components/profile/ReadingActivityChart";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import { type Book, type Thought } from "@/data/books";
+import {
+  getMonthlyPagesData,
+  getYearlyPagesData,
+} from "@/lib/readingActivity";
 import { useBooks } from "@/store/useLibrary";
 
 type LatestThought = {
@@ -11,6 +24,11 @@ type LatestThought = {
 };
 
 const USERNAME = "Ceaser12";
+
+const CURRENT_MONTH_LABEL = new Date().toLocaleDateString("uk-UA", {
+  month: "long",
+});
+const CURRENT_YEAR_LABEL = String(new Date().getFullYear());
 
 const getLatestThought = (books: Book[]): LatestThought | null => {
   const bookWithThought = books.find((book) => book.thoughts.length > 0);
@@ -30,6 +48,9 @@ const ProfilePage = () => {
     (book) => book.status === "finished",
   ).length;
   const latestThought = getLatestThought(books);
+
+  const monthlyData = useMemo(() => getMonthlyPagesData(books), [books]);
+  const yearlyData = useMemo(() => getYearlyPagesData(books), [books]);
 
   return (
     <div className="mx-auto flex h-full w-full max-w-md flex-col pb-24">
@@ -68,6 +89,46 @@ const ProfilePage = () => {
               ? "У бібліотеці ще немає книг"
               : `${Math.round((completedBooks / totalBooks) * 100)}% виконано`}
           </p>
+        </section>
+
+        <section
+          aria-labelledby="reading-activity"
+          className="mt-6 rounded-2xl bg-card p-4"
+        >
+          <SectionHeading id="reading-activity" className="mb-3">
+            Активність читання
+          </SectionHeading>
+
+          <Tabs defaultValue="month" className="w-full">
+            <TabsList className="w-full">
+              <TabsTrigger value="month">Місяць</TabsTrigger>
+              <TabsTrigger value="year">Рік</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="month">
+              <p className="mb-2 text-xs text-muted-foreground capitalize">
+                {CURRENT_MONTH_LABEL}
+              </p>
+              <ReadingActivityChart
+                data={monthlyData}
+                emptyMessage="Цього місяця ще немає прочитаних сторінок"
+                minTickGap={20}
+                className="h-44 w-full"
+              />
+            </TabsContent>
+
+            <TabsContent value="year">
+              <p className="mb-2 text-xs text-muted-foreground">
+                {CURRENT_YEAR_LABEL}
+              </p>
+              <ReadingActivityChart
+                data={yearlyData}
+                emptyMessage="Цього року ще немає прочитаних сторінок"
+                minTickGap={4}
+                className="h-44 w-full"
+              />
+            </TabsContent>
+          </Tabs>
         </section>
 
         <section aria-labelledby="latest-thought" className="mt-8">

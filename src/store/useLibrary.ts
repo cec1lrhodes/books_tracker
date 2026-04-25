@@ -64,12 +64,54 @@ const createBook = ({
 const formatDayLabel = (date: Date): string =>
   date.toLocaleDateString("en-US", { month: "short", day: "2-digit" });
 
-const createSession = (fromPage: number, toPage: number): ReadingSession => ({
-  id: `s-${Date.now()}`,
-  label: formatDayLabel(new Date()),
-  fromPage,
-  toPage,
-});
+const SHORT_MONTH_INDEX: Record<string, number> = {
+  jan: 0,
+  feb: 1,
+  mar: 2,
+  apr: 3,
+  may: 4,
+  jun: 5,
+  jul: 6,
+  aug: 7,
+  sep: 8,
+  oct: 9,
+  nov: 10,
+  dec: 11,
+};
+
+const backfillCreatedAt = (label: string): string => {
+  const today = new Date();
+  const normalized = label.trim().toLowerCase();
+
+  if (normalized === "today") return today.toISOString();
+
+  const match = normalized.match(/^([a-z]{3})\s+(\d{1,2})$/);
+  if (match) {
+    const [, monthKey, dayValue] = match;
+    const monthIndex = SHORT_MONTH_INDEX[monthKey];
+    const day = Number.parseInt(dayValue, 10);
+    if (monthIndex !== undefined && Number.isFinite(day)) {
+      const year =
+        monthIndex > today.getMonth()
+          ? today.getFullYear() - 1
+          : today.getFullYear();
+      return new Date(year, monthIndex, day, 12).toISOString();
+    }
+  }
+
+  return today.toISOString();
+};
+
+const createSession = (fromPage: number, toPage: number): ReadingSession => {
+  const createdAt = new Date();
+  return {
+    id: `s-${createdAt.getTime()}`,
+    label: formatDayLabel(createdAt),
+    fromPage,
+    toPage,
+    createdAt: createdAt.toISOString(),
+  };
+};
 
 const createThought = (text: string): Thought => ({
   id: `t-${Date.now()}`,
@@ -165,18 +207,35 @@ export const useLibraryStore = create<LibraryState>()(
       name: "books-tracker:library",
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ books: state.books }),
-      version: 2,
+      version: 3,
       migrate: (persistedState, version) => {
+        let state = persistedState as { books?: Book[] };
+
         if (version < 2) {
-          const legacy = persistedState as { books?: Array<Book & { thoughts?: Thought[] }> };
-          return {
+          const legacy = persistedState as {
+            books?: Array<Book & { thoughts?: Thought[] }>;
+          };
+          state = {
             books: (legacy.books ?? []).map((book) => ({
               ...book,
               thoughts: book.thoughts ?? [],
             })),
           };
         }
-        return persistedState as { books: Book[] };
+
+        if (version < 3) {
+          state = {
+            books: (state.books ?? []).map((book) => ({
+              ...book,
+              sessions: book.sessions.map((session) => ({
+                ...session,
+                createdAt: session.createdAt ?? backfillCreatedAt(session.label),
+              })),
+            })),
+          };
+        }
+
+        return state as { books: Book[] };
       },
     },
   ),

@@ -6,6 +6,16 @@ export type ReadingSession = {
   fromPage: number;
   toPage: number;
   minutes?: number;
+  createdAt?: string;
+};
+
+const now = new Date();
+
+const isoDaysAgo = (daysAgo: number): string => {
+  const date = new Date(now);
+  date.setHours(12, 0, 0, 0);
+  date.setDate(date.getDate() - daysAgo);
+  return date.toISOString();
 };
 
 export type Thought = {
@@ -44,9 +54,30 @@ export const books: Book[] = [
     status: "reading",
     startedAt: "Mar 28",
     sessions: [
-      { id: "s1", label: "Today", fromPage: 140, toPage: 156, minutes: 35 },
-      { id: "s2", label: "Apr 15", fromPage: 110, toPage: 140, minutes: 48 },
-      { id: "s3", label: "Apr 12", fromPage: 80, toPage: 110, minutes: 52 },
+      {
+        id: "s1",
+        label: "Today",
+        fromPage: 140,
+        toPage: 156,
+        minutes: 35,
+        createdAt: isoDaysAgo(0),
+      },
+      {
+        id: "s2",
+        label: "Apr 15",
+        fromPage: 110,
+        toPage: 140,
+        minutes: 48,
+        createdAt: isoDaysAgo(10),
+      },
+      {
+        id: "s3",
+        label: "Apr 12",
+        fromPage: 80,
+        toPage: 110,
+        minutes: 52,
+        createdAt: isoDaysAgo(13),
+      },
     ],
     thoughts: [
       {
@@ -73,8 +104,22 @@ export const books: Book[] = [
     status: "reading",
     startedAt: "Apr 02",
     sessions: [
-      { id: "s1", label: "Apr 14", fromPage: 50, toPage: 68, minutes: 28 },
-      { id: "s2", label: "Apr 10", fromPage: 20, toPage: 50, minutes: 42 },
+      {
+        id: "s1",
+        label: "Apr 14",
+        fromPage: 50,
+        toPage: 68,
+        minutes: 28,
+        createdAt: isoDaysAgo(11),
+      },
+      {
+        id: "s2",
+        label: "Apr 10",
+        fromPage: 20,
+        toPage: 50,
+        minutes: 42,
+        createdAt: isoDaysAgo(15),
+      },
     ],
     thoughts: [],
   },
@@ -90,7 +135,14 @@ export const books: Book[] = [
     status: "reading",
     startedAt: "Apr 12",
     sessions: [
-      { id: "s1", label: "Apr 13", fromPage: 10, toPage: 32, minutes: 30 },
+      {
+        id: "s1",
+        label: "Apr 13",
+        fromPage: 10,
+        toPage: 32,
+        minutes: 30,
+        createdAt: isoDaysAgo(12),
+      },
     ],
     thoughts: [],
   },
@@ -106,7 +158,30 @@ export const books: Book[] = [
     status: "reading",
     startedAt: "Mar 10",
     sessions: [
-      { id: "s1", label: "Apr 16", fromPage: 70, toPage: 100, minutes: 55 },
+      {
+        id: "s1",
+        label: "Apr 16",
+        fromPage: 70,
+        toPage: 100,
+        minutes: 55,
+        createdAt: isoDaysAgo(9),
+      },
+      {
+        id: "s2",
+        label: "Mar 18",
+        fromPage: 30,
+        toPage: 70,
+        minutes: 65,
+        createdAt: isoDaysAgo(38),
+      },
+      {
+        id: "s3",
+        label: "Feb 22",
+        fromPage: 0,
+        toPage: 30,
+        minutes: 50,
+        createdAt: isoDaysAgo(62),
+      },
     ],
     thoughts: [],
   },
