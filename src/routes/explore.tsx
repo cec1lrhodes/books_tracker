@@ -1,10 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router"
 
-import PlaceholderPage from "@/components/pages/PlaceholderPage"
+import ExplorePage from "@/components/pages/ExplorePage"
 
-const ExploreRoute = () => (
-  <PlaceholderPage title="Explore" description="Discover new books soon." />
-)
+const ExploreRoute = () => <ExplorePage />
 
 export const Route = createFileRoute("/explore")({
   component: ExploreRoute,
