@@ -12,11 +12,13 @@ import { type ExploreFilter } from "@/types/explore"
 const getRandomGenre = () =>
   GENRES[Math.floor(Math.random() * GENRES.length)]
 
+const sessionRandomGenre = getRandomGenre()
+
 const ExplorePage = () => {
   const libraryBooks = useBooks()
   const [activeFilter, setActiveFilter] = useState<ExploreFilter>("recommendation")
   const [selectedGenres, setSelectedGenres] = useState<Genre[]>([])
-  const [allGenre] = useState<Genre>(getRandomGenre)
+  const [allGenre] = useState<Genre>(sessionRandomGenre)
 
   const recommendedGenre = useMemo(() => {
     const genreScores = libraryBooks.reduce<Record<string, number>>((scores, book) => {
